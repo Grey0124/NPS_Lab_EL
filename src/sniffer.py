@@ -10,6 +10,7 @@ import sys
 import os
 import platform
 import logging
+import logging.handlers
 import yaml
 from datetime import datetime
 from typing import Optional, Dict, Any, List
@@ -34,34 +35,73 @@ if platform.system() == "Windows":
         print("Warning: Running without administrator privileges. Some features may not work.")
         print("Please run the script as administrator for full functionality.")
 
-# Configure logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s',
-    datefmt='%Y-%m-%d %H:%M:%S'
-)
+# Initialize logger (will be configured in ARPSniffer._setup_logging)
 logger = logging.getLogger(__name__)
 
 class ARPSniffer:
     """ARP packet sniffer class for capturing and analyzing ARP traffic."""
 
-    def __init__(self, interface: str = "eth0", registry_file: str = "registry.yml"):
+    def __init__(self, interface: str = "eth0", registry_file: str = "registry.yml", log_file: Optional[str] = None):
         """
         Initialize the ARP sniffer.
 
         Args:
             interface (str): Network interface to capture packets on
             registry_file (str): Path to the registry YAML file
+            log_file (Optional[str]): Path to log file for mismatches (default: None, use stdout)
         """
         self.interface = interface
         self.registry_file = registry_file
+        self.log_file = log_file
         self.arp_cache: Dict[str, Dict[str, Any]] = {}
         self.registry: Dict[str, Any] = {}
         self.registry_devices: Dict[str, Dict[str, Any]] = {}
         self.registry_settings: Dict[str, Any] = {}
+        self._setup_logging()
         self._load_registry()
         self._validate_interface()
         self._check_platform_requirements()
+
+    def _setup_logging(self) -> None:
+        """Setup logging configuration with optional rolling file handler."""
+        # Clear any existing handlers
+        logger = logging.getLogger(__name__)
+        for handler in logger.handlers[:]:
+            logger.removeHandler(handler)
+        
+        # Set log level
+        logger.setLevel(logging.INFO)
+        
+        # Create formatter
+        formatter = logging.Formatter(
+            '%(asctime)s - %(levelname)s - %(message)s',
+            datefmt='%Y-%m-%d %H:%M:%S'
+        )
+        
+        # Console handler for general info
+        console_handler = logging.StreamHandler(sys.stdout)
+        console_handler.setLevel(logging.INFO)
+        console_handler.setFormatter(formatter)
+        logger.addHandler(console_handler)
+        
+        # File handler for mismatches if log_file is specified
+        if self.log_file:
+            try:
+                # Create rolling file handler (10MB max size, keep 5 backup files)
+                file_handler = logging.handlers.RotatingFileHandler(
+                    self.log_file,
+                    maxBytes=10*1024*1024,  # 10MB
+                    backupCount=5,
+                    encoding='utf-8'
+                )
+                file_handler.setLevel(logging.WARNING)  # Only log warnings and errors
+                file_handler.setFormatter(formatter)
+                logger.addHandler(file_handler)
+                
+                logger.info(f"Logging mismatches to: {self.log_file}")
+            except Exception as e:
+                logger.error(f"Failed to setup log file {self.log_file}: {str(e)}")
+                logger.info("Continuing with console logging only")
 
     def _check_platform_requirements(self) -> None:
         """Check platform-specific requirements."""
@@ -331,7 +371,7 @@ class ARPSniffer:
 
 def list_interfaces() -> None:
     """List all available network interfaces."""
-    sniffer = ARPSniffer(interface="eth0")  # Temporary instance just to use its methods
+    sniffer = ARPSniffer(interface="eth0", log_file=None)  # Temporary instance just to use its methods
     interfaces = sniffer._get_available_interfaces()
     logger.info("Available network interfaces:")
     logger.info(sniffer._format_interface_list(interfaces))
@@ -361,13 +401,21 @@ def main():
         default='registry.yml',
         help='Path to registry YAML file (default: registry.yml)'
     )
+    parser.add_argument(
+        '--log-file',
+        help='Path to log file for mismatches (default: stdout only)'
+    )
     args = parser.parse_args()
 
     if args.list:
         list_interfaces()
         return
 
-    sniffer = ARPSniffer(interface=args.interface, registry_file=args.registry)
+    sniffer = ARPSniffer(
+        interface=args.interface, 
+        registry_file=args.registry,
+        log_file=args.log_file
+    )
     sniffer.start_sniffing(count=args.count)
 
 if __name__ == "__main__":

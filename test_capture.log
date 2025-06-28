@@ -1,0 +1,33 @@
+2025-06-28 19:13:09 - WARNING - REGISTRY VIOLATION - Source: 192.168.0.1 (98:da:c4:b0:e4:02)
+    Warning: MAC mismatch for IP 192.168.0.1
+    Device Info: {'mac': 'aa:bb:cc:dd:ee:ff', 'description': 'Router', 'device_type': 'router', 'trusted': True}
+2025-06-28 19:13:09 - WARNING - REGISTRY VIOLATION - Destination: 192.168.0.191 (00:00:00:00:00:00)
+    Warning: MAC mismatch for IP 192.168.0.191
+    Device Info: {'mac': '50:c2:e8:16:62:8b', 'description': 'Your Computer', 'device_type': 'workstation', 'trusted': True}
+2025-06-28 19:13:09 - WARNING - REGISTRY VIOLATION - Destination: 192.168.0.1 (98:da:c4:b0:e4:02)
+    Warning: MAC mismatch for IP 192.168.0.1
+    Device Info: {'mac': 'aa:bb:cc:dd:ee:ff', 'description': 'Router', 'device_type': 'router', 'trusted': True}
+2025-06-28 19:21:32 - WARNING - REGISTRY VIOLATION - Destination: 192.168.0.1 (ff:ff:ff:ff:ff:ff)
+    Warning: MAC mismatch for IP 192.168.0.1
+    Device Info: {'mac': 'aa:bb:cc:dd:ee:ff', 'description': 'Router', 'device_type': 'router', 'trusted': True}
+2025-06-28 19:21:38 - WARNING - REGISTRY VIOLATION - Source: 192.168.0.1 (98:da:c4:b0:e4:02)
+    Warning: MAC mismatch for IP 192.168.0.1
+    Device Info: {'mac': 'aa:bb:cc:dd:ee:ff', 'description': 'Router', 'device_type': 'router', 'trusted': True}
+2025-06-28 19:21:38 - WARNING - REGISTRY VIOLATION - Destination: 192.168.0.191 (00:00:00:00:00:00)
+    Warning: MAC mismatch for IP 192.168.0.191
+    Device Info: {'mac': '50:c2:e8:16:62:8b', 'description': 'Your Computer', 'device_type': 'workstation', 'trusted': True}
+2025-06-28 19:21:38 - WARNING - REGISTRY VIOLATION - Destination: 192.168.0.1 (98:da:c4:b0:e4:02)
+    Warning: MAC mismatch for IP 192.168.0.1
+    Device Info: {'mac': 'aa:bb:cc:dd:ee:ff', 'description': 'Router', 'device_type': 'router', 'trusted': True}
+2025-06-28 19:22:22 - WARNING - REGISTRY VIOLATION - Source: 192.168.0.1 (98:da:c4:b0:e4:02)
+    Warning: MAC mismatch for IP 192.168.0.1
+    Device Info: {'mac': 'aa:bb:cc:dd:ee:ff', 'description': 'Router', 'device_type': 'router', 'trusted': True}
+2025-06-28 19:22:22 - WARNING - REGISTRY VIOLATION - Destination: 192.168.0.191 (00:00:00:00:00:00)
+    Warning: MAC mismatch for IP 192.168.0.191
+    Device Info: {'mac': '50:c2:e8:16:62:8b', 'description': 'Your Computer', 'device_type': 'workstation', 'trusted': True}
+2025-06-28 19:22:22 - WARNING - REGISTRY VIOLATION - Destination: 192.168.0.1 (98:da:c4:b0:e4:02)
+    Warning: MAC mismatch for IP 192.168.0.1
+    Device Info: {'mac': 'aa:bb:cc:dd:ee:ff', 'description': 'Router', 'device_type': 'router', 'trusted': True}
+2025-06-28 19:23:06 - WARNING - REGISTRY VIOLATION - Destination: 192.168.0.191 (00:00:00:00:00:00)
+    Warning: MAC mismatch for IP 192.168.0.191
+    Device Info: {'mac': '50:c2:e8:16:62:8b', 'description': 'Your Computer', 'device_type': 'workstation', 'trusted': True}

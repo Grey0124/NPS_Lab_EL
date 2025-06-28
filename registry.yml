@@ -33,10 +33,10 @@ devices:
     trusted: true
 
   # Printer
-  "192.168.1.50":
-    mac: "33:44:55:66:77:88"
-    description: "Network Printer"
-    device_type: "printer"
+  "192.168.0.1":
+    mac: "98:da:c4:b0:e4:02"
+    description: "Google"
+    device_type: "Website"
     trusted: true
 
   # IoT Device
@@ -46,13 +46,7 @@ devices:
     device_type: "iot"
     trusted: false
 
-  # Your router (replace with actual IP and MAC)
-  "192.168.0.1":
-    mac: "aa:bb:cc:dd:ee:ff"  # Replace with actual router MAC
-    description: "Router"
-    device_type: "router"
-    trusted: true
-
+  
   # Your computer (from the interface list)
   "192.168.0.191":
     mac: "50:c2:e8:16:62:8b"  # This matches your interface

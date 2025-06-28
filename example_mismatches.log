@@ -1,0 +1,22 @@
+# Example Log File - ARP Mismatches and Violations
+# This file demonstrates the format of the rolling log files created by the sniffer
+
+2025-06-21 15:03:15 - WARNING - REGISTRY VIOLATION - Source: 192.168.0.1 (98:da:c4:b0:e4:02)
+    Warning: MAC mismatch for IP 192.168.0.1
+    Device Info: {'mac': 'aa:bb:cc:dd:ee:ff', 'description': 'Router', 'device_type': 'router', 'trusted': True}
+
+2025-06-21 15:03:16 - WARNING - REGISTRY VIOLATION - Destination: 192.168.0.191 (00:00:00:00:00:00)
+    Warning: MAC mismatch for IP 192.168.0.191
+    Device Info: {'mac': '50:c2:e8:16:62:8b', 'description': 'Your Computer', 'device_type': 'workstation', 'trusted': True}
+
+2025-06-21 15:03:20 - WARNING - Potential ARP spoofing detected!
+    IP: 192.168.0.100
+    Old MAC: 11:22:33:44:55:66
+    New MAC: aa:bb:cc:dd:ee:ff
+
+2025-06-21 15:03:25 - WARNING - REGISTRY VIOLATION - Source: 192.168.0.999 (99:88:77:66:55:44)
+    Warning: Unknown IP 192.168.0.999 in strict mode
+    Device Info: None
+
+# Note: This is an example file. Real log files will contain actual timestamps
+# and violation data from your network monitoring sessions. 
