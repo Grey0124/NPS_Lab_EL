@@ -28,7 +28,6 @@ const Configuration: React.FC = () => {
   const [backups, setBackups] = useState<Array<{ name: string; path: string; created: string; size: number }>>([]);
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [registryEntries, setRegistryEntries] = useState<Record<string, string>>({});
-  const [showRegistry, setShowRegistry] = useState(false);
   const [newEntry, setNewEntry] = useState({ ip: '', mac: '' });
   const [registryLastUpdated, setRegistryLastUpdated] = useState<Date | null>(null);
   const [registryLoading, setRegistryLoading] = useState(false);
@@ -818,7 +817,7 @@ const Configuration: React.FC = () => {
                     </div>
                   ) : (
                     <div className="space-y-1">
-                      {Object.entries(registryEntries).map(([ip, mac], index) => (
+                      {Object.entries(registryEntries).map(([ip, mac]) => (
                         <div key={ip} className="flex items-center justify-between group hover:bg-gray-800 px-2 py-1 rounded">
                           <div className="flex-1">
                             <span className="text-blue-400">{ip}</span>

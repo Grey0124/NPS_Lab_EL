@@ -22,9 +22,8 @@ const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 
 // Initialize Analytics (only in production)
-let analytics;
 if (typeof window !== 'undefined' && import.meta.env.PROD) {
-  analytics = getAnalytics(app);
+  getAnalytics(app);
 }
 
 // Google Auth Provider
