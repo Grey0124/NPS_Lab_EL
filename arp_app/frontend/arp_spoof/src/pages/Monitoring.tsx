@@ -140,31 +140,23 @@ const Monitoring: React.FC = () => {
 
   const loadRecentDetections = async () => {
     try {
-      // First check if backend is accessible
-      const healthCheck = await apiService.healthCheck();
-      if (healthCheck.status !== 'healthy') {
-        console.warn('Backend health check failed, skipping detections load');
-        setRecentDetections([]);
-        return;
-      }
+      // Test detections endpoint - COMMENTED OUT: Automatic registry addition is now working properly
+      // try {
+      //   const testResponse = await apiService.testDetectionsEndpoint();
+      //   console.log('Test detections response:', testResponse);
+      //   
+      //   if (testResponse.status !== 'success') {
+      //     console.warn('Test detections endpoint failed:', testResponse.message);
+      //     setRecentDetections([]);
+      //     return;
+      //   }
+      // } catch (testError) {
+      //   console.warn('Test detections endpoint error:', testError);
+      //   setRecentDetections([]);
+      //   return;
+      // }
       
-      // Test the detections endpoint specifically
-      try {
-        const testResponse = await apiService.testDetectionsEndpoint();
-        console.log('Test detections response:', testResponse);
-        
-        if (testResponse.status !== 'success') {
-          console.warn('Test detections endpoint failed:', testResponse.message);
-          setRecentDetections([]);
-          return;
-        }
-      } catch (testError) {
-        console.warn('Test detections endpoint error:', testError);
-        setRecentDetections([]);
-        return;
-      }
-      
-      // If test passes, load actual detections
+      // Load actual detections directly
       const response = await apiService.getRecentDetections(10);
       setRecentDetections(response.detections);
     } catch (error) {

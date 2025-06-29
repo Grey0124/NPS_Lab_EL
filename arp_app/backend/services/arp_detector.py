@@ -27,13 +27,15 @@ import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 import requests
+from .arp_registry import ARPRegistry
 
 class ARPSpoofingDetector:
     """Complete ARP spoofing detection system with ML integration."""
     
     def __init__(self, interface=None, registry_path=None, model_path=None, 
                  log_file=None, alert_email=None, webhook_url=None, 
-                 detection_threshold=0.7, batch_size=100, max_queue_size=1000):
+                 detection_threshold=0.7, batch_size=100, max_queue_size=1000,
+                 auto_registry_addition=True):
         
         # Configuration
         self.interface = interface
@@ -45,6 +47,7 @@ class ARPSpoofingDetector:
         self.detection_threshold = detection_threshold
         self.batch_size = batch_size
         self.max_queue_size = max_queue_size
+        self.auto_registry_addition = auto_registry_addition
         
         # State management
         self.running = False
@@ -54,12 +57,14 @@ class ARPSpoofingDetector:
             'arp_packets': 0,
             'detected_attacks': 0,
             'false_positives': 0,
-            'last_alert_time': None
+            'last_alert_time': None,
+            'registry_additions': 0
         }
         
         # Network state tracking
         self.arp_cache = {}  # IP -> MAC mapping
         self.mac_history = defaultdict(deque)  # MAC -> recent IPs
+        self.arp_history = defaultdict(lambda: {'count': 0, 'suspicious': False, 'last_seen': None})  # IP -> history
         self.suspicious_ips = set()
         
         # ML model
@@ -69,13 +74,13 @@ class ARPSpoofingDetector:
         self.feature_names = None
         
         # Registry for known IP-MAC pairs
-        self.registry = {}
+        self.registry_manager = ARPRegistry(registry_path or 'data/registry.yml')
+        self.registry = self.registry_manager.entries
         
         # Setup logging
         self.setup_logging()
         
-        # Load components
-        self.load_registry()
+        # Load components (registry auto-created by ARPRegistry)
         self.load_ml_model()
         
         # Alert system
@@ -102,20 +107,6 @@ class ARPSpoofingDetector:
         self.logger = logging.getLogger(__name__)
         self.logger.info("ARP Spoofing Detector initialized")
         
-    def load_registry(self):
-        """Load IP-MAC registry from YAML file."""
-        if not self.registry_path or not os.path.exists(self.registry_path):
-            self.logger.warning("No registry file found, using empty registry")
-            return
-            
-        try:
-            with open(self.registry_path, 'r') as f:
-                self.registry = yaml.safe_load(f) or {}
-            self.logger.info(f"Loaded registry with {len(self.registry)} entries")
-        except Exception as e:
-            self.logger.error(f"Failed to load registry: {e}")
-            self.registry = {}
-            
     def load_ml_model(self):
         """Load the trained ML model."""
         if not self.model_path or not os.path.exists(self.model_path):
@@ -330,6 +321,37 @@ class ARPSpoofingDetector:
             # Log detection (this will call the web handler for every packet)
             self.log_detection(detection_result)
             
+            # Update ARP history for validation
+            if ARP in packet:
+                # Track ARP history for this IP
+                if src_ip in self.arp_history:
+                    self.arp_history[src_ip]['count'] += 1
+                    self.arp_history[src_ip]['last_seen'] = time.time()
+                    if detection_result['combined_threat']:
+                        self.arp_history[src_ip]['suspicious'] = True
+                else:
+                    self.arp_history[src_ip] = {
+                        'count': 1,
+                        'suspicious': detection_result['combined_threat'],
+                        'last_seen': time.time()
+                    }
+            
+            # Automatic registry addition for valid ARP entries
+            if ARP in packet and self.auto_registry_addition:
+                # Only add to registry if this is NOT a threat (valid ARP mapping)
+                if not detection_result['combined_threat']:
+                    if self.is_valid_arp_entry(src_ip, src_mac):
+                        added = self.registry_manager.add_entry(src_ip, src_mac)
+                        if added:
+                            self.logger.info(f"✅ AUTO-ADDED to registry: {src_ip} -> {src_mac}")
+                            self.detection_stats['registry_additions'] += 1
+                        else:
+                            self.logger.info(f"ℹ️  Registry entry already exists: {src_ip} -> {src_mac}")
+                    else:
+                        self.logger.info(f"🚫 Skipped adding to registry (not valid): {src_ip} -> {src_mac}")
+                else:
+                    self.logger.info(f"🚫 Skipped adding to registry (threat detected): {src_ip} -> {src_mac}")
+                
         except Exception as e:
             self.logger.error(f"Error processing packet: {e}")
             
@@ -503,7 +525,71 @@ Action Required: Investigate network traffic from {detection_result['src_ip']}
         print(f"Detected Attacks: {stats['detected_attacks']:,}")
         print(f"Detection Rate: {stats['detected_attacks']/max(stats['arp_packets'], 1)*100:.2f}%")
         print(f"Last Alert: {stats['last_alert_time'] or 'None'}")
+        print(f"Registry Additions: {stats['registry_additions']:,}")
+        print(f"Auto Registry Addition: {'Enabled' if self.auto_registry_addition else 'Disabled'}")
+        print(f"Registry Entries: {len(self.registry_manager.entries)}")
         print(f"{'='*50}")
+    
+    def get_registry_stats(self):
+        """Get registry-related statistics."""
+        return {
+            'auto_registry_addition': self.auto_registry_addition,
+            'registry_additions': self.detection_stats.get('registry_additions', 0),
+            'total_registry_entries': len(self.registry_manager.entries),
+            'arp_history_size': len(self.arp_history)
+        }
+
+    def is_valid_arp_entry(self, ip, mac):
+        """
+        Determine if an ARP entry is valid for automatic addition to registry.
+        Enhanced logic to be more intelligent about what constitutes a valid entry.
+        """
+        # Basic validation
+        if not ip or not mac:
+            return False
+            
+        # Check if IP is in suspicious list
+        if ip in self.suspicious_ips:
+            self.logger.debug(f"Skipping suspicious IP for registry: {ip}")
+            return False
+            
+        # Check if IP is in private ranges (more likely to be valid)
+        try:
+            ip_parts = ip.split('.')
+            if len(ip_parts) == 4:
+                first_octet = int(ip_parts[0])
+                second_octet = int(ip_parts[1])
+                
+                # Common private IP ranges - be more inclusive
+                if (first_octet == 10 or  # 10.0.0.0/8
+                    (first_octet == 172 and 16 <= second_octet <= 31) or  # 172.16.0.0/12
+                    (first_octet == 192 and second_octet == 168)):  # 192.168.0.0/16 (all subnets)
+                    return True
+                    
+                # Localhost
+                if ip == "127.0.0.1":
+                    return True
+                    
+                # Link-local addresses
+                if first_octet == 169 and second_octet == 254:
+                    return True
+                    
+                # Special addresses
+                if ip == "0.0.0.0":
+                    return True
+                    
+        except (ValueError, IndexError):
+            pass
+            
+        # For public IPs, be more conservative
+        # Only add if we've seen consistent behavior
+        if ip in self.arp_history:
+            # If we've seen this IP multiple times without issues, consider it valid
+            if self.arp_history[ip]['count'] >= 3 and not self.arp_history[ip]['suspicious']:
+                return True
+                
+        # Default: don't add public IPs automatically unless we have more context
+        return False
 
 def signal_handler(signum, frame):
     """Handle shutdown signals."""

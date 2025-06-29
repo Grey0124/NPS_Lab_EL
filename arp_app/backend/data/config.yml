@@ -1,9 +1,11 @@
 alerts:
   email_enabled: false
   email_recipients: []
+  enable_desktop_notifications: true
+  enable_sound_alerts: true
   notification_cooldown: 300
   webhook_enabled: false
-  webhook_url: null
+  webhook_url: ''
 database:
   echo: false
   url: sqlite:///data/arp_detector.db
@@ -11,14 +13,26 @@ detection:
   alert_cooldown: 300
   batch_size: 100
   detection_threshold: 0.7
+  enable_heuristics: true
+  enable_ml: true
   log_file: logs/arp_detector.log
   max_queue_size: 1000
+  max_retries: 3
   model_path: models/realistic_rf_model.joblib
   registry_path: data/registry.yml
+  scan_interval: 5
+  sensitivity: high
+  timeout: 30
 logging:
   file: logs/app.log
   format: '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
   level: INFO
+system:
+  auto_start: false
+  backup_interval: 24
+  enable_backup: true
+  log_level: INFO
+  max_log_size: 100
 web:
   cors_origins:
   - http://localhost:5173

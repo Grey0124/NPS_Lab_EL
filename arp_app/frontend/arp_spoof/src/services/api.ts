@@ -69,18 +69,6 @@ export interface AlertStats {
   low: number;
 }
 
-export interface DetectionConfig {
-  sensitivity: 'low' | 'medium' | 'high' | 'critical';
-  scanInterval: number;
-  maxRetries: number;
-  timeout: number;
-  enableML: boolean;
-  enableHeuristics: boolean;
-  detection_threshold?: number;
-  batch_size?: number;
-  max_queue_size?: number;
-}
-
 export interface AlertConfig {
   emailEnabled: boolean;
   emailRecipients: string[];
@@ -205,7 +193,6 @@ class APIService {
 
   // Configuration endpoints
   async getConfiguration(): Promise<{
-    detection: DetectionConfig;
     alerts: AlertConfig;
     system: SystemConfig;
   }> {
@@ -213,17 +200,6 @@ class APIService {
     
     // Convert backend snake_case to frontend camelCase
     return {
-      detection: {
-        sensitivity: response.detection?.sensitivity || 'medium',
-        scanInterval: response.detection?.scan_interval || 5,
-        maxRetries: response.detection?.max_retries || 3,
-        timeout: response.detection?.timeout || 30,
-        enableML: response.detection?.enable_ml !== false,
-        enableHeuristics: response.detection?.enable_heuristics !== false,
-        detection_threshold: response.detection?.detection_threshold,
-        batch_size: response.detection?.batch_size,
-        max_queue_size: response.detection?.max_queue_size
-      },
       alerts: {
         emailEnabled: response.alerts?.email_enabled || false,
         emailRecipients: response.alerts?.email_recipients || [],
@@ -244,25 +220,10 @@ class APIService {
   }
 
   async updateConfiguration(config: {
-    detection?: Partial<DetectionConfig>;
     alerts?: Partial<AlertConfig>;
   }): Promise<{ status: string; message: string }> {
     // Convert frontend camelCase to backend snake_case
     const backendConfig: any = {};
-    
-    if (config.detection) {
-      backendConfig.detection = {
-        sensitivity: config.detection.sensitivity,
-        scan_interval: config.detection.scanInterval,
-        max_retries: config.detection.maxRetries,
-        timeout: config.detection.timeout,
-        enable_ml: config.detection.enableML,
-        enable_heuristics: config.detection.enableHeuristics,
-        detection_threshold: config.detection.detection_threshold,
-        batch_size: config.detection.batch_size,
-        max_queue_size: config.detection.max_queue_size
-      };
-    }
     
     if (config.alerts) {
       backendConfig.alerts = {
@@ -286,6 +247,61 @@ class APIService {
     return this.request('/config/reset', {
       method: 'POST'
     });
+  }
+
+  async exportConfiguration(): Promise<{
+    status: string;
+    config: any;
+    exported_at: string;
+    version: string;
+  }> {
+    return this.request('/config/export');
+  }
+
+  async importConfiguration(config: any): Promise<{ status: string; message: string }> {
+    return this.request('/config/import', {
+      method: 'POST',
+      body: JSON.stringify({ config })
+    });
+  }
+
+  async validateConfiguration(): Promise<{
+    status: string;
+    valid: boolean;
+    errors: string[];
+    warnings: string[];
+  }> {
+    return this.request('/config/validate');
+  }
+
+  async createConfigurationBackup(): Promise<{
+    status: string;
+    message: string;
+    backup_path: string;
+  }> {
+    return this.request('/config/backup');
+  }
+
+  async listConfigurationBackups(): Promise<{
+    status: string;
+    backups: Array<{
+      name: string;
+      path: string;
+      created: string;
+      size: number;
+    }>;
+  }> {
+    return this.request('/config/backups');
+  }
+
+  async restoreConfigurationBackup(backupName: string): Promise<{ status: string; message: string }> {
+    return this.request(`/config/restore/${encodeURIComponent(backupName)}`, {
+      method: 'POST'
+    });
+  }
+
+  async getConfigurationSchema(): Promise<any> {
+    return this.request('/config/schema');
   }
 
   // Alert endpoints
@@ -411,19 +427,63 @@ class APIService {
     }
   }
 
-  // Test detections endpoint
-  async testDetectionsEndpoint(): Promise<{ status: string; message: string; detections_count: number }> {
-    try {
-      const response = await this.request<any>('/test-detections');
-      return response;
-    } catch (error) {
-      console.error('Test detections endpoint failed:', error);
-      return {
-        status: 'failed',
-        message: 'Failed to test detections endpoint',
-        detections_count: 0
-      };
-    }
+  // Test detections endpoint - COMMENTED OUT: Automatic registry addition is now working properly
+  // async testDetectionsEndpoint(): Promise<{ status: string; message: string; detections_count: number }> {
+  //   try {
+  //     const response = await this.request<any>('/test-detections');
+  //     return response;
+  //   } catch (error) {
+  //     console.error('Test detections endpoint failed:', error);
+  //     return {
+  //       status: 'failed',
+  //       message: 'Failed to test detections endpoint',
+  //       detections_count: 0
+  //     };
+  //   }
+  // }
+
+  // Registry management endpoints
+  async getRegistryEntries(): Promise<{
+    status: string;
+    entries: Record<string, string>;
+    count: number;
+  }> {
+    return this.request('/registry/direct');
+  }
+
+  async exportRegistry(): Promise<{
+    status: string;
+    entries: Record<string, string>;
+    exported_at: string;
+    count: number;
+  }> {
+    return this.request('/registry/export');
+  }
+
+  async importRegistry(entries: Record<string, string>): Promise<{ status: string; message: string }> {
+    return this.request('/registry/import', {
+      method: 'POST',
+      body: JSON.stringify({ entries })
+    });
+  }
+
+  async addRegistryEntry(ip: string, mac: string): Promise<{ status: string; message: string }> {
+    return this.request('/registry/add', {
+      method: 'POST',
+      body: JSON.stringify({ ip, mac })
+    });
+  }
+
+  async removeRegistryEntry(ip: string): Promise<{ status: string; message: string }> {
+    return this.request(`/registry/remove/${encodeURIComponent(ip)}`, {
+      method: 'DELETE'
+    });
+  }
+
+  async resetRegistry(): Promise<{ status: string; message: string }> {
+    return this.request('/registry/reset', {
+      method: 'POST'
+    });
   }
 }
 

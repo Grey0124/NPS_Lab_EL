@@ -62,6 +62,39 @@
     animation: float 6s ease-in-out infinite;
   }
 
+  /* Custom scrollbar styles for terminal */
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: #4B5563 #1F2937;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: #1F2937;
+    border-radius: 4px;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background: #4B5563;
+    border-radius: 4px;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    background: #6B7280;
+  }
+
+  /* Terminal-specific scrollbar */
+  .scrollbar-thumb-gray-600::-webkit-scrollbar-thumb {
+    background: #4B5563;
+  }
+
+  .scrollbar-track-gray-800::-webkit-scrollbar-track {
+    background: #1F2937;
+  }
+
   @keyframes float {
     0%, 100% {
       transform: translateY(0px);

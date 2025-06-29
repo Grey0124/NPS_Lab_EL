@@ -25,6 +25,7 @@ sys.path.append(str(Path(__file__).parent))
 from services.arp_detector_service import ARPDetectionService
 from services.config_service import ConfigService
 from services.alert_service import AlertService
+from services.registry_service import RegistryService
 from models.database import init_db
 from api.routes import router as api_router, set_services
 from websocket.manager import WebSocketManager
@@ -68,6 +69,7 @@ app.add_middleware(
 arp_service: Optional[ARPDetectionService] = None
 config_service: Optional[ConfigService] = None
 alert_service: Optional[AlertService] = None
+registry_service: Optional[RegistryService] = None
 websocket_manager: Optional[WebSocketManager] = None
 
 # Shutdown event
@@ -81,7 +83,7 @@ def signal_handler(signum, frame):
 @app.on_event("startup")
 async def startup_event():
     """Initialize services on startup."""
-    global arp_service, config_service, alert_service, websocket_manager
+    global arp_service, config_service, alert_service, registry_service, websocket_manager
     
     logger.info("Starting ARP Spoofing Detection Web Application...")
     
@@ -91,6 +93,7 @@ async def startup_event():
     # Initialize services
     config_service = ConfigService()
     alert_service = AlertService()
+    registry_service = RegistryService()
     websocket_manager = WebSocketManager()
     
     # Start WebSocket queue processor
@@ -104,7 +107,7 @@ async def startup_event():
     )
     
     # Set service references in API routes
-    set_services(arp_service, config_service, alert_service, websocket_manager)
+    set_services(arp_service, config_service, alert_service, registry_service, websocket_manager)
     
     logger.info("All services initialized successfully")
 

@@ -128,7 +128,8 @@ class ARPDetectionService:
                 webhook_url=config.get('webhook_url'),
                 detection_threshold=config.get('detection_threshold', 0.7),
                 batch_size=config.get('batch_size', 100),
-                max_queue_size=config.get('max_queue_size', 1000)
+                max_queue_size=config.get('max_queue_size', 1000),
+                auto_registry_addition=config.get('auto_registry_addition', True)
             )
             
             # Override alert methods to integrate with web services
