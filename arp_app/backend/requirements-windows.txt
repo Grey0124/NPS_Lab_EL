@@ -1,0 +1,30 @@
+# Windows-compatible requirements for ARP Guardian Backend
+# Use this file if you encounter compilation issues with the main requirements.txt
+
+# Core web framework
+fastapi>=0.104.1
+uvicorn[standard]>=0.24.0
+websockets>=12.0
+
+# Network packet capture and analysis
+scapy>=2.5.0
+
+# Data processing and ML (use pre-compiled wheels)
+# Install these separately if needed:
+# pip install --only-binary=all pandas numpy scikit-learn
+
+# Alternative: Use conda for these packages if pip fails
+# conda install pandas numpy scikit-learn
+
+# Other dependencies
+joblib>=1.3.0
+pyyaml>=6.0.1
+python-multipart>=0.0.6
+pydantic>=2.5.0
+python-jose[cryptography]>=3.3.0
+passlib[bcrypt]>=1.7.4
+python-dotenv>=1.0.0
+psutil>=5.9.6
+aiofiles>=23.2.1
+sqlalchemy>=2.0.23
+alembic>=1.12.1 

@@ -1,0 +1,28 @@
+alerts:
+  email_enabled: false
+  email_recipients: []
+  notification_cooldown: 300
+  webhook_enabled: false
+  webhook_url: null
+database:
+  echo: false
+  url: sqlite:///data/arp_detector.db
+detection:
+  alert_cooldown: 300
+  batch_size: 100
+  detection_threshold: 0.7
+  log_file: logs/arp_detector.log
+  max_queue_size: 1000
+  model_path: models/realistic_rf_model.joblib
+  registry_path: data/registry.yml
+logging:
+  file: logs/app.log
+  format: '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+  level: INFO
+web:
+  cors_origins:
+  - http://localhost:5173
+  - http://localhost:3000
+  debug: true
+  host: 0.0.0.0
+  port: 8000

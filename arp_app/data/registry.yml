@@ -1,0 +1,70 @@
+# Static IP⇄MAC Registry
+# This file contains known IP to MAC address mappings for network devices
+# Used by the ARP sniffer to detect potential ARP spoofing attacks
+
+# Network devices registry
+devices:
+  # Router/Gateway
+  "192.168.1.1":
+    mac: "00:11:22:33:44:55"
+    description: "Main Router"
+    device_type: "router"
+    trusted: true
+
+  # Server
+  "192.168.1.10":
+    mac: "aa:bb:cc:dd:ee:ff"
+    description: "File Server"
+    device_type: "server"
+    trusted: true
+
+  # Workstation 1
+  "192.168.1.100":
+    mac: "11:22:33:44:55:66"
+    description: "Workstation 1"
+    device_type: "workstation"
+    trusted: true
+
+  # Workstation 2
+  "192.168.1.101":
+    mac: "22:33:44:55:66:77"
+    description: "Workstation 2"
+    device_type: "workstation"
+    trusted: true
+
+  # Printer
+  "192.168.0.1":
+    mac: "98:da:c4:b0:e4:02"
+    description: "Google"
+    device_type: "Website"
+    trusted: true
+
+  # IoT Device
+  "192.168.1.200":
+    mac: "44:55:66:77:88:99"
+    description: "Smart Camera"
+    device_type: "iot"
+    trusted: false
+
+  
+  # Your computer (from the interface list)
+  "192.168.0.191":
+    mac: "50:c2:e8:16:62:8b"  # This matches your interface
+    description: "Your Computer"
+    device_type: "workstation"
+    trusted: true
+
+# Network configuration
+network:
+  subnet: "192.168.1.0/24"
+  gateway: "192.168.1.1"
+  dns_servers:
+    - "192.168.1.1"
+    - "8.8.8.8"
+
+# Registry settings
+settings:
+  strict_mode: false  # Start with false for testing
+  log_unknown_devices: true
+  auto_update: false
+  check_interval: 300 
