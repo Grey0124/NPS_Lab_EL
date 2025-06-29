@@ -246,9 +246,23 @@ class ARPDetectionService:
             self.live_stats['last_attack_time'] = detection_result['timestamp'].isoformat()
             
             # Send alert through alert service (thread-safe)
-            self.alert_service.send_alert_sync(detection_result)
+            alert_created = self.alert_service.send_alert_sync(detection_result)
             
-            # Broadcast to WebSocket clients (thread-safe)
+            if alert_created:
+                # Get the latest alert from the alert service
+                latest_alerts = self.alert_service.alert_history
+                if latest_alerts:
+                    latest_alert = latest_alerts[-1]  # Get the most recent alert
+                    
+                    # Broadcast new alert to WebSocket clients
+                    self.websocket_manager.broadcast_sync({
+                        'type': 'new_alert',
+                        'data': latest_alert
+                    })
+                    
+                    logger.info(f"New alert broadcasted: {latest_alert['title']}")
+            
+            # Also broadcast the detection record for dashboard updates
             self.websocket_manager.broadcast_sync({
                 'type': 'attack_detected',
                 'data': detection_record

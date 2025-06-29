@@ -37,6 +37,9 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+# Get port from environment variable (for Render deployment)
+PORT = int(os.environ.get("PORT", 8080))
+
 # Create FastAPI app
 app = FastAPI(
     title="ARP Spoofing Detection API",
@@ -56,6 +59,7 @@ app.add_middleware(
         "http://127.0.0.1:3000",  # Alternative localhost
         "http://localhost:8080",  # Alternative port
         "http://127.0.0.1:8080",  # Alternative port
+        "https://your-frontend-domain.onrender.com",  # Replace with your frontend URL
         "*"  # Allow all origins for development (fallback)
     ],
     allow_credentials=True,
@@ -87,29 +91,33 @@ async def startup_event():
     
     logger.info("Starting ARP Spoofing Detection Web Application...")
     
-    # Initialize database
-    await init_db()
-    
-    # Initialize services
-    config_service = ConfigService()
-    alert_service = AlertService()
-    registry_service = RegistryService()
-    websocket_manager = WebSocketManager()
-    
-    # Start WebSocket queue processor
-    await websocket_manager.start_queue_processor()
-    
-    # Initialize ARP detection service
-    arp_service = ARPDetectionService(
-        config_service=config_service,
-        alert_service=alert_service,
-        websocket_manager=websocket_manager
-    )
-    
-    # Set service references in API routes
-    set_services(arp_service, config_service, alert_service, registry_service, websocket_manager)
-    
-    logger.info("All services initialized successfully")
+    try:
+        # Initialize database
+        await init_db()
+        
+        # Initialize services
+        config_service = ConfigService()
+        alert_service = AlertService()
+        registry_service = RegistryService()
+        websocket_manager = WebSocketManager()
+        
+        # Start WebSocket queue processor
+        await websocket_manager.start_queue_processor()
+        
+        # Initialize ARP detection service
+        arp_service = ARPDetectionService(
+            config_service=config_service,
+            alert_service=alert_service,
+            websocket_manager=websocket_manager
+        )
+        
+        # Set service references in API routes
+        set_services(arp_service, config_service, alert_service, registry_service, websocket_manager)
+        
+        logger.info("All services initialized successfully")
+    except Exception as e:
+        logger.error(f"Error during startup: {e}")
+        raise
 
 @app.on_event("shutdown")
 async def shutdown_event_handler():
@@ -118,15 +126,18 @@ async def shutdown_event_handler():
     
     logger.info("Shutting down ARP Spoofing Detection Web Application...")
     
-    # Stop ARP monitoring
-    if arp_service:
-        await arp_service.stop_monitoring()
-    
-    # Stop WebSocket manager
-    if websocket_manager:
-        await websocket_manager.shutdown()
-    
-    logger.info("Shutdown complete")
+    try:
+        # Stop ARP monitoring
+        if arp_service:
+            await arp_service.stop_monitoring()
+        
+        # Stop WebSocket manager
+        if websocket_manager:
+            await websocket_manager.shutdown()
+        
+        logger.info("Shutdown complete")
+    except Exception as e:
+        logger.error(f"Error during shutdown: {e}")
 
 # Include API routes
 app.include_router(api_router, prefix="/api/v1")
@@ -177,7 +188,8 @@ async def root():
         "version": "1.0.0",
         "docs": "/docs",
         "health": "/health",
-        "websocket": "/ws"
+        "websocket": "/ws",
+        "deployment": "Render"
     }
 
 # Error handlers
@@ -232,8 +244,8 @@ if __name__ == "__main__":
         uvicorn.run(
             "main:app",
             host="0.0.0.0",
-            port=8000,
-            reload=True,
+            port=PORT,
+            reload=False,  # Disable reload in production
             log_level="info"
         )
     except KeyboardInterrupt:

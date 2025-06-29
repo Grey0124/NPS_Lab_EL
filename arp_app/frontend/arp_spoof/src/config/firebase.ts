@@ -6,13 +6,13 @@ import { getAnalytics } from "firebase/analytics";
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
-  apiKey: "AIzaSyCKr3i38gFBBagMVjMmvTHH4hu7mkFKzpw",
-  authDomain: "arp-spoof-8d356.firebaseapp.com",
-  projectId: "arp-spoof-8d356",
-  storageBucket: "arp-spoof-8d356.firebasestorage.app",
-  messagingSenderId: "439105494123",
-  appId: "1:439105494123:web:a887185d211f1d9cc2252e",
-  measurementId: "G-25QPXM299C"
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID,
+  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID
 };
 
 // Initialize Firebase
@@ -23,7 +23,7 @@ export const auth = getAuth(app);
 
 // Initialize Analytics (only in production)
 let analytics;
-if (typeof window !== 'undefined' && process.env.NODE_ENV === 'production') {
+if (typeof window !== 'undefined' && import.meta.env.PROD) {
   analytics = getAnalytics(app);
 }
 
