@@ -45,7 +45,9 @@ logs/
 
 # Data files (will be created at runtime)
 data/
-models/
+
+# Model files (large binary files)
+models/*.joblib
 
 # Documentation
 README.md
