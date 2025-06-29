@@ -60,6 +60,7 @@ app.add_middleware(
         "http://localhost:8080",  # Alternative port
         "http://127.0.0.1:8080",  # Alternative port
         "https://nps-lab-el.onrender.com",  # Render backend
+        "https://nps-lab-el.vercel.app",  # Vercel frontend
         "https://your-frontend-domain.vercel.app",  # Vercel frontend
         "https://your-frontend-domain.netlify.app",  # Netlify frontend
         "https://your-frontend-domain.onrender.com",  # Render frontend

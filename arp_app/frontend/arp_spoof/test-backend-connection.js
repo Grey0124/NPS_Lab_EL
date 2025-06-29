@@ -26,12 +26,12 @@ async function testBackendConnection() {
     const apiHealthData = await apiHealthResponse.json();
     console.log('✅ API v1 health response:', apiHealthData);
     
-    // Test 4: CORS preflight
-    console.log('\n4️⃣ Testing CORS...');
+    // Test 4: CORS preflight from Vercel domain
+    console.log('\n4️⃣ Testing CORS from Vercel domain...');
     const corsResponse = await fetch(`${API_URL}/api/v1/health`, {
       method: 'OPTIONS',
       headers: {
-        'Origin': 'http://localhost:5173',
+        'Origin': 'https://nps-lab-el.vercel.app',
         'Access-Control-Request-Method': 'GET',
         'Access-Control-Request-Headers': 'Content-Type'
       }
