@@ -9,6 +9,6 @@ services:
       - key: PYTHON_VERSION
         value: 3.11.0
       - key: PORT
-        value: 8080
+        value: 8000
     healthCheckPath: /health
     autoDeploy: true 

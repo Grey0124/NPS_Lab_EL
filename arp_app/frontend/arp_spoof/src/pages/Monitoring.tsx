@@ -20,7 +20,13 @@ const Monitoring: React.FC = () => {
       detected_attacks: 0,
       last_attack_time: null,
       current_interface: null,
-      monitoring_status: 'stopped'
+      monitoring_status: 'stopped',
+      // Prevention statistics
+      prevention_active: false,
+      packets_dropped: 0,
+      arp_entries_corrected: 0,
+      quarantined_ips: 0,
+      rate_limited_ips: 0
     },
     recent_detections_count: 0
   });
@@ -337,7 +343,7 @@ const Monitoring: React.FC = () => {
               {isMonitoring ? 'Active' : 'Inactive'}
             </div>
           </div>
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-6">
             <div className="text-center">
               <div className="text-3xl font-bold text-blue-600 mb-2">{status.live_stats.total_packets.toLocaleString()}</div>
               <div className="text-sm text-gray-600">Packets Analyzed</div>
@@ -347,18 +353,44 @@ const Monitoring: React.FC = () => {
               <div className="text-sm text-gray-600">Threats Detected</div>
             </div>
             <div className="text-center">
-              <div
-                className="text-3xl font-bold text-purple-600 mb-2 truncate max-w-xs mx-auto cursor-pointer"
-                title={status.current_interface || 'None'}
-                style={{ wordBreak: 'break-all', fontSize: '1.25rem', lineHeight: '1.4' }}
-              >
-                {status.current_interface || 'None'}
-              </div>
-              <div className="text-sm text-gray-600">Active Interface</div>
+              <div className="text-3xl font-bold text-orange-600 mb-2">{status.live_stats.packets_dropped}</div>
+              <div className="text-sm text-gray-600">Packets Dropped</div>
             </div>
             <div className="text-center">
-              <div className="text-3xl font-bold text-green-600 mb-2">{status.live_stats.last_attack_time ? 'Yes' : 'No'}</div>
-              <div className="text-sm text-gray-600">Recent Activity</div>
+              <div className="text-3xl font-bold text-green-600 mb-2">{status.live_stats.arp_entries_corrected}</div>
+              <div className="text-sm text-gray-600">ARP Entries Corrected</div>
+              </div>
+            <div className="text-center">
+              <div className="text-3xl font-bold text-purple-600 mb-2">{status.live_stats.quarantined_ips}</div>
+              <div className="text-sm text-gray-600">Quarantined IPs</div>
+            </div>
+            <div className="text-center">
+              <div className="text-3xl font-bold text-indigo-600 mb-2">{status.live_stats.rate_limited_ips}</div>
+              <div className="text-sm text-gray-600">Rate Limited IPs</div>
+            </div>
+          </div>
+          
+          {/* Prevention Status */}
+          <div className="mt-6 pt-6 border-t border-gray-200">
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-semibold text-gray-700">Prevention Status</h3>
+              <div className={`px-3 py-1 rounded-full text-sm font-semibold ${status.live_stats.prevention_active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>
+                {status.live_stats.prevention_active ? 'Active' : 'Inactive'}
+              </div>
+            </div>
+            <div className="mt-4 grid md:grid-cols-2 gap-4">
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-gray-600">Current Interface:</span>
+                <span className="text-sm font-medium text-gray-900 truncate max-w-xs" title={status.current_interface || 'None'}>
+                  {status.current_interface || 'None'}
+                </span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-gray-600">Recent Activity:</span>
+                <span className="text-sm font-medium text-gray-900">
+                  {status.live_stats.last_attack_time ? 'Yes' : 'No'}
+                </span>
+              </div>
             </div>
           </div>
         </div>

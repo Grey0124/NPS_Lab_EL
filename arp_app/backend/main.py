@@ -38,7 +38,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 # Get port from environment variable (for Render deployment)
-PORT = int(os.environ.get("PORT", 8080))
+PORT = int(os.environ.get("PORT", 8000))
 
 # Create FastAPI app
 app = FastAPI(
@@ -57,8 +57,8 @@ app.add_middleware(
         "http://localhost:3000",  # React dev server
         "http://127.0.0.1:5173",  # Alternative localhost
         "http://127.0.0.1:3000",  # Alternative localhost
-        "http://localhost:8080",  # Alternative port
-        "http://127.0.0.1:8080",  # Alternative port
+        "http://localhost:8000",  # Alternative port
+        "http://127.0.0.1:8000",  # Alternative port
         "https://nps-lab-el.onrender.com",  # Render backend
         "https://nps-lab-el.vercel.app",  # Vercel frontend
         "https://your-frontend-domain.vercel.app",  # Vercel frontend

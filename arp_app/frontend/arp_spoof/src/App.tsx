@@ -7,6 +7,7 @@ import Monitoring from './pages/Monitoring';
 import Statistics from './pages/Statistics';
 import Configuration from './pages/Configuration';
 import Alerts from './pages/Alerts';
+import Prevention from './pages/Prevention';
 import './App.css';
 
 function App() {
@@ -23,6 +24,7 @@ function App() {
                 <Route path="/statistics" element={<Statistics />} />
                 <Route path="/configuration" element={<Configuration />} />
                 <Route path="/alerts" element={<Alerts />} />
+                <Route path="/prevention" element={<Prevention />} />
               </Routes>
             </main>
           </ProtectedRoute>

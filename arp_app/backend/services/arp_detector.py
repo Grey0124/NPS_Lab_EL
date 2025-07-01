@@ -357,12 +357,15 @@ class ARPSpoofingDetector:
             
     def generate_alert(self, detection_result):
         """Generate and send alerts for detected attacks."""
+        self.logger.info(f"generate_alert called for threat: {detection_result['src_ip']} -> {detection_result['dst_ip']}")
+        
         current_time = time.time()
         src_ip = detection_result['src_ip']
         
         # Check cooldown
         if src_ip in self.recent_alerts:
             if current_time - self.recent_alerts[src_ip] < self.alert_cooldown:
+                self.logger.debug(f"Alert cooldown active for {src_ip}")
                 return
                 
         self.recent_alerts[src_ip] = current_time
@@ -434,6 +437,8 @@ Action Required: Investigate network traffic from {detection_result['src_ip']}
             
     def log_detection(self, detection_result):
         """Log detection results."""
+        self.logger.debug(f"log_detection called for packet: {detection_result['src_ip']} -> {detection_result['dst_ip']}")
+        
         if detection_result['combined_threat']:
             self.logger.warning(f"[THREAT] DETECTED: {detection_result['src_ip']} -> {detection_result['dst_ip']} "
                               f"(ML: {detection_result['ml_prediction']}, "

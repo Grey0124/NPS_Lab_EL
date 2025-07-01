@@ -767,6 +767,119 @@ async def reset_registry():
         logger.error(f"Error resetting registry: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
+# Prevention endpoints
+@router.get("/prevention/stats")
+async def get_prevention_stats(
+    arp_service: ARPDetectionService = Depends(get_arp_service)
+):
+    """Get prevention statistics."""
+    try:
+        stats = await arp_service.get_prevention_stats()
+        return stats
+    except Exception as e:
+        logger.error(f"Error getting prevention stats: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.get("/prevention/quarantine")
+async def get_quarantine_list(
+    arp_service: ARPDetectionService = Depends(get_arp_service)
+):
+    """Get quarantine list."""
+    try:
+        quarantine_list = await arp_service.get_quarantine_list()
+        return {"quarantine_list": quarantine_list, "count": len(quarantine_list)}
+    except Exception as e:
+        logger.error(f"Error getting quarantine list: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.get("/prevention/rate-limits")
+async def get_rate_limits(
+    arp_service: ARPDetectionService = Depends(get_arp_service)
+):
+    """Get rate limit entries."""
+    try:
+        rate_limits = await arp_service.get_rate_limits()
+        return {"rate_limits": rate_limits, "count": len(rate_limits)}
+    except Exception as e:
+        logger.error(f"Error getting rate limits: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.post("/prevention/legitimate")
+async def add_legitimate_entry(
+    request: dict,
+    arp_service: ARPDetectionService = Depends(get_arp_service)
+):
+    """Add a legitimate IP-MAC mapping."""
+    try:
+        ip = request.get('ip')
+        mac = request.get('mac')
+        
+        if not ip or not mac:
+            raise HTTPException(status_code=400, detail="IP and MAC address required")
+        
+        result = await arp_service.add_legitimate_entry(ip, mac)
+        return result
+    except Exception as e:
+        logger.error(f"Error adding legitimate entry: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.delete("/prevention/quarantine/{ip}")
+async def remove_quarantine_entry(
+    ip: str,
+    arp_service: ARPDetectionService = Depends(get_arp_service)
+):
+    """Remove an IP from quarantine."""
+    try:
+        result = await arp_service.remove_quarantine(ip)
+        return result
+    except Exception as e:
+        logger.error(f"Error removing quarantine entry: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.post("/prevention/clear")
+async def clear_prevention_data(
+    arp_service: ARPDetectionService = Depends(get_arp_service)
+):
+    """Clear all prevention data."""
+    try:
+        result = await arp_service.clear_prevention_data()
+        return result
+    except Exception as e:
+        logger.error(f"Error clearing prevention data: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.get("/prevention/arp-table")
+async def get_arp_table(
+    arp_service: ARPDetectionService = Depends(get_arp_service)
+):
+    """Get current ARP table."""
+    try:
+        arp_table = arp_service.get_arp_table()
+        return {"arp_table": arp_table, "count": len(arp_table)}
+    except Exception as e:
+        logger.error(f"Error getting ARP table: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.post("/prevention/test")
+async def test_prevention_action(
+    request: dict,
+    arp_service: ARPDetectionService = Depends(get_arp_service)
+):
+    """Test prevention action with a mock threat."""
+    try:
+        ip = request.get('ip')
+        mac = request.get('mac')
+        threat_level = request.get('threat_level', 'HIGH')
+        
+        if not ip or not mac:
+            raise HTTPException(status_code=400, detail="IP and MAC address required")
+        
+        result = await arp_service.test_prevention_action(ip, mac, threat_level)
+        return result
+    except Exception as e:
+        logger.error(f"Error testing prevention action: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
 # Set global service references (called by main.py)
 def set_services(
     arp_svc: ARPDetectionService,

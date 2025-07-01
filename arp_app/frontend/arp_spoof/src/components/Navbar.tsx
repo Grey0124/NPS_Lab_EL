@@ -13,7 +13,8 @@ const Navbar: React.FC = () => {
   const navItems = [
     { path: '/', label: 'Home', icon: '🏠' },
     { path: '/monitoring', label: 'Monitoring', icon: '🔍' },
-    { path: '/statistics', label: 'Statistics', icon: '📊' },
+    { path: '/statistics', label: 'Statistics', icon: '��' },
+    { path: '/prevention', label: 'Prevention', icon: '🛡️' },
     { path: '/configuration', label: 'Configuration', icon: '⚙️' },
     { path: '/alerts', label: 'Alerts', icon: '🚨' },
   ];

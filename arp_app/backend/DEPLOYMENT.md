@@ -48,7 +48,7 @@ arp_app/
 
 4. **Environment Variables** (Optional)
    - `PYTHON_VERSION`: `3.11.0`
-   - `PORT`: `8080` (Render will set this automatically)
+   - `PORT`: `8000` (Render will set this automatically)
 
 5. **Deploy**
    - Click "Create Web Service"
@@ -156,7 +156,7 @@ You can set these in Render dashboard:
 
 | Variable | Description | Default |
 |----------|-------------|---------|
-| `PORT` | Application port | `8080` |
+| `PORT` | Application port | `8000` |
 | `PYTHON_VERSION` | Python version | `3.11.0` |
 
 ## Next Steps

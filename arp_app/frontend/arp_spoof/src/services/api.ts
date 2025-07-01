@@ -17,6 +17,12 @@ export interface MonitoringStatus {
     last_attack_time: string | null;
     current_interface: string | null;
     monitoring_status: string;
+    // Prevention statistics
+    prevention_active: boolean;
+    packets_dropped: number;
+    arp_entries_corrected: number;
+    quarantined_ips: number;
+    rate_limited_ips: number;
   };
   recent_detections_count: number;
 }
@@ -88,7 +94,7 @@ export interface SystemConfig {
 }
 
 export interface WebSocketMessage {
-  type: 'monitoring_status' | 'attack_detected' | 'stats_update' | 'alert';
+  type: 'monitoring_status' | 'attack_detected' | 'stats_update' | 'alert' | 'prevention_action';
   data?: any;
   status?: string;
   interface?: string;
@@ -483,6 +489,96 @@ class APIService {
   async resetRegistry(): Promise<{ status: string; message: string }> {
     return this.request('/registry/reset', {
       method: 'POST'
+    });
+  }
+
+  // Prevention endpoints
+  async getPreventionStats(): Promise<{
+    is_active: boolean;
+    current_interface: string | null;
+    total_packets_dropped: number;
+    total_arp_entries_corrected: number;
+    total_quarantined_ips: number;
+    total_rate_limited_ips: number;
+    last_prevention_time: string | null;
+    prevention_duration: number;
+    quarantine_count: number;
+    rate_limit_count: number;
+    arp_table_size: number;
+    legitimate_entries: number;
+  }> {
+    return this.request('/prevention/stats');
+  }
+
+  async getQuarantineList(): Promise<{
+    quarantine_list: Array<{
+      ip: string;
+      mac: string;
+      reason: string;
+      quarantined_at: string;
+      expires_at: string;
+      attempts: number;
+    }>;
+    count: number;
+  }> {
+    return this.request('/prevention/quarantine');
+  }
+
+  async getRateLimits(): Promise<{
+    rate_limits: Array<{
+      ip: string;
+      mac: string;
+      first_seen: string;
+      last_seen: string;
+      packet_count: number;
+      blocked_until: string | null;
+    }>;
+    count: number;
+  }> {
+    return this.request('/prevention/rate-limits');
+  }
+
+  async addLegitimateEntry(ip: string, mac: string): Promise<{ status: string; message: string }> {
+    return this.request('/prevention/legitimate', {
+      method: 'POST',
+      body: JSON.stringify({ ip, mac })
+    });
+  }
+
+  async removeQuarantineEntry(ip: string): Promise<{ status: string; message: string }> {
+    return this.request(`/prevention/quarantine/${encodeURIComponent(ip)}`, {
+      method: 'DELETE'
+    });
+  }
+
+  async clearPreventionData(): Promise<{ status: string; message: string }> {
+    return this.request('/prevention/clear', {
+      method: 'POST'
+    });
+  }
+
+  async getArpTable(): Promise<{
+    arp_table: Array<{
+      ip: string;
+      mac: string;
+      type: string;
+      interface: string | null;
+      is_legitimate: boolean;
+    }>;
+    count: number;
+  }> {
+    return this.request('/prevention/arp-table');
+  }
+
+  async testPreventionAction(ip: string, mac: string, threatLevel: string = 'HIGH'): Promise<{
+    success: boolean;
+    message: string;
+    action?: string;
+    reason?: string;
+  }> {
+    return this.request('/prevention/test', {
+      method: 'POST',
+      body: JSON.stringify({ ip, mac, threat_level: threatLevel })
     });
   }
 }
